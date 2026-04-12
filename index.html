@@ -137,6 +137,9 @@
         .btn-back { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-bottom: 20px; font-family: inherit; }
         select { background: #151515; color: white; border: 1px solid var(--border); padding: 10px; border-radius: 10px; font-family: inherit; }
         input { font-family: inherit; }
+        
+        /* Title Image Styling */
+        #d-title img { max-width: 400px; max-height: 150px; object-fit: contain; display: block; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -189,7 +192,7 @@
         <div style="display:flex; gap:50px; flex-wrap: wrap; align-items: flex-end;">
             <div id="d-poster" style="width:300px; aspect-ratio:2/3; border-radius:20px; background-size:cover; box-shadow: 0 20px 50px rgba(0,0,0,0.5);"></div>
             <div style="flex:1; min-width:350px;">
-                <h1 id="d-title" style="font-size:64px; margin:0 0 10px 0; font-weight:900;"></h1>
+                <div id="d-title"></div>
                 <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
                     <span class="star">★ <span id="d-rating" style="color:white"></span></span>
                     <span id="d-year" class="meta-tag"></span>
@@ -265,7 +268,6 @@
             sel.appendChild(opt);
         });
 
-        // Check if warning should be shown
         if (localStorage.getItem('hideMurphTubeWarning') !== 'true') {
             document.getElementById('entry-warning').style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -373,14 +375,28 @@
 
     async function openDetails(item) {
         const type = item.type || (item.name || item.first_air_date || item.media_type === 'tv' ? 'tv' : 'movie');
-        const data = await fetch(`https://api.themoviedb.org/3/${type}/${item.id}?api_key=${KEY}`).then(r => r.json());
+        
+        // Fetch main data and images (for logo)
+        const [data, imgData] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/${type}/${item.id}?api_key=${KEY}`).then(r => r.json()),
+            fetch(`https://api.themoviedb.org/3/${type}/${item.id}/images?api_key=${KEY}`).then(r => r.json())
+        ]);
         
         document.getElementById('details-overlay').style.display = 'block';
         document.body.style.overflow = 'hidden';
 
         document.getElementById('d-backdrop').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.backdrop_path})`;
         document.getElementById('d-poster').style.backgroundImage = `url(https://image.tmdb.org/t/p/w500${data.poster_path})`;
-        document.getElementById('d-title').innerText = data.title || data.name;
+        
+        // Logo Logic
+        const logo = imgData.logos.find(l => l.iso_639_1 === 'en') || imgData.logos[0];
+        const titleDiv = document.getElementById('d-title');
+        if (logo) {
+            titleDiv.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${logo.file_path}" alt="title logo">`;
+        } else {
+            titleDiv.innerHTML = `<h1 style="font-size:64px; margin:0 0 10px 0; font-weight:900;">${data.title || data.name}</h1>`;
+        }
+
         document.getElementById('d-overview').innerText = data.overview;
         document.getElementById('d-rating').innerText = data.vote_average.toFixed(1);
         document.getElementById('d-year').innerText = (data.release_date || data.first_air_date || '').split('-')[0];
