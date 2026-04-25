@@ -173,7 +173,10 @@
 
 <div class="main-content">
     <div id="history-section" style="display:none; margin-bottom:50px;">
-        <h2 class="section-title">Continue Watching</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 20px;">
+            <h2 class="section-title">Continue Watching</h2>
+            <button onclick="clearHistory()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:5px 15px; border-radius:20px; cursor:pointer; font-size:12px; font-family:inherit;">Clear All</button>
+        </div>
         <div id="history-grid" class="row-scroll"></div>
     </div>
     
@@ -224,6 +227,16 @@
 <script>
     const KEY = "2713804610e1e236b1cf44bfac3a7776";
     let current = null, mode = 'home';
+    
+    // Filtering logic
+    const BLOCKED_IDS = [20222, 300496, 440249, 318256, 426889, 1087040, 418579, 13805, 95897, 241002, 113137];
+
+    function isFiltered(item) {
+        if (BLOCKED_IDS.includes(item.id)) return true;
+        const title = (item.title || item.name || "").toLowerCase();
+        if (title.includes("porn")) return true;
+        return false;
+    }
 
     const SOURCES = [
         { name: "VidKing", url: "https://vidking.net/embed/{t}/{id}{sh}" },
@@ -277,6 +290,11 @@
         loadPage();
     }
 
+    function clearHistory() {
+        localStorage.removeItem('alg_history');
+        updateHistory();
+    }
+
     function dismissWarning() {
         if (document.getElementById('hide-warning-check').checked) {
             localStorage.setItem('hideMurphTubeWarning', 'true');
@@ -305,20 +323,30 @@
                 { title: "Trending Now", url: `trending/all/week` },
                 { title: "Action & Adventure", url: `discover/movie?with_genres=28,12` },
                 { title: "Comedy Hits", url: `discover/movie?with_genres=35` },
-                { title: "Sci-Fi & Fantasy", url: `discover/movie?with_genres=878` }
+                { title: "Sci-Fi & Fantasy", url: `discover/movie?with_genres=878` },
+                { title: "Horror", url: `discover/movie?with_genres=27` },
+                { title: "Documentaries", url: `discover/movie?with_genres=99` }
             ];
         } else if (mode === 'movie') {
             categories = [
                 { title: "Popular Movies", url: `movie/popular` },
                 { title: "Top Rated", url: `movie/top_rated` },
+                { title: "Action & Adventure", url: `discover/movie?with_genres=28,12` },
+                { title: "Animation", url: `discover/movie?with_genres=16` },
                 { title: "Horror", url: `discover/movie?with_genres=27` },
-                { title: "Romance", url: `discover/movie?with_genres=10749` }
+                { title: "Romance", url: `discover/movie?with_genres=10749` },
+                { title: "Thriller", url: `discover/movie?with_genres=53` },
+                { title: "Drama", url: `discover/movie?with_genres=18` }
             ];
         } else if (mode === 'tv') {
             categories = [
                 { title: "Popular TV Shows", url: `tv/popular` },
+                { title: "Sci-Fi & Fantasy", url: `discover/tv?with_genres=10765` },
+                { title: "Action & Adventure", url: `discover/tv?with_genres=10759` },
+                { title: "Comedy", url: `discover/tv?with_genres=35` },
                 { title: "Animation", url: `discover/tv?with_genres=16` },
                 { title: "Mystery & Crime", url: `discover/tv?with_genres=80,9648` },
+                { title: "Drama", url: `discover/tv?with_genres=18` },
                 { title: "Documentary", url: `discover/tv?with_genres=99` }
             ];
         }
@@ -339,7 +367,7 @@
         row.className = 'row-scroll';
         
         items.forEach(item => {
-            if(!item.poster_path) return;
+            if(!item.poster_path || isFiltered(item)) return;
             const c = document.createElement('div'); 
             c.className = 'card';
             c.style.backgroundImage = `url(https://image.tmdb.org/t/p/w500${item.poster_path})`;
@@ -362,7 +390,7 @@
         }
 
         items.forEach(item => {
-            if(!item.poster_path) return;
+            if(!item.poster_path || isFiltered(item)) return;
             const c = document.createElement('div'); 
             c.className = 'card';
             c.style.flex = targetId === 'history-grid' ? '0 0 180px' : 'unset';
@@ -376,7 +404,6 @@
     async function openDetails(item) {
         const type = item.type || (item.name || item.first_air_date || item.media_type === 'tv' ? 'tv' : 'movie');
         
-        // Fetch main data and images (for logo)
         const [data, imgData] = await Promise.all([
             fetch(`https://api.themoviedb.org/3/${type}/${item.id}?api_key=${KEY}`).then(r => r.json()),
             fetch(`https://api.themoviedb.org/3/${type}/${item.id}/images?api_key=${KEY}`).then(r => r.json())
@@ -388,7 +415,6 @@
         document.getElementById('d-backdrop').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.backdrop_path})`;
         document.getElementById('d-poster').style.backgroundImage = `url(https://image.tmdb.org/t/p/w500${data.poster_path})`;
         
-        // Logo Logic
         const logo = imgData.logos.find(l => l.iso_639_1 === 'en') || imgData.logos[0];
         const titleDiv = document.getElementById('d-title');
         if (logo) {
