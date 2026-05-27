@@ -229,12 +229,12 @@
     let current = null, mode = 'home';
     
     // Filtering logic
-    const BLOCKED_IDS = [20222, 300496, 440249, 318256, 426889, 1087040, 418579, 13805, 95897, 241002, 113137];
+    const BLOCKED_IDS = [20222, 300496, 440249, 318256, 426889, 1087040, 418579, 13805, 95897, 241002, 113137, 1522126];
 
     function isFiltered(item) {
         if (BLOCKED_IDS.includes(item.id)) return true;
         const title = (item.title || item.name || "").toLowerCase();
-        if (title.includes("porn")) return true;
+        if (title.includes("porn, onlyfans, only fans, bonnie blue, overflow, monika, sexual, horny, xrated, x-rated, pornography ")) return true;
         return false;
     }
 
