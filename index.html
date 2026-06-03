@@ -234,7 +234,7 @@
     function isFiltered(item) {
         if (BLOCKED_IDS.includes(item.id)) return true;
         const title = (item.title || item.name || "").toLowerCase();
-        if (title.includes("porn, onlyfans, only fans, bonnie blue, overflow, monika, sexual, horny, xrated, x-rated, pornography ")) return true;
+        if (title.includes("porn, onlyfans, only fans, bonnie blue, overflow, monika, sexual, horny, xrated, x-rated, pornography")) return true;
         return false;
     }
 
@@ -324,8 +324,7 @@
                 { title: "Action & Adventure", url: `discover/movie?with_genres=28,12` },
                 { title: "Comedy Hits", url: `discover/movie?with_genres=35` },
                 { title: "Sci-Fi & Fantasy", url: `discover/movie?with_genres=878` },
-                { title: "Horror", url: `discover/movie?with_genres=27` },
-                { title: "Documentaries", url: `discover/movie?with_genres=99` }
+                { title: "Horror", url: `discover/movie?with_genres=27` }
             ];
         } else if (mode === 'movie') {
             categories = [
@@ -334,7 +333,6 @@
                 { title: "Action & Adventure", url: `discover/movie?with_genres=28,12` },
                 { title: "Animation", url: `discover/movie?with_genres=16` },
                 { title: "Horror", url: `discover/movie?with_genres=27` },
-                { title: "Romance", url: `discover/movie?with_genres=10749` },
                 { title: "Thriller", url: `discover/movie?with_genres=53` },
                 { title: "Drama", url: `discover/movie?with_genres=18` }
             ];
@@ -346,8 +344,7 @@
                 { title: "Comedy", url: `discover/tv?with_genres=35` },
                 { title: "Animation", url: `discover/tv?with_genres=16` },
                 { title: "Mystery & Crime", url: `discover/tv?with_genres=80,9648` },
-                { title: "Drama", url: `discover/tv?with_genres=18` },
-                { title: "Documentary", url: `discover/tv?with_genres=99` }
+                { title: "Drama", url: `discover/tv?with_genres=18` }
             ];
         }
 
